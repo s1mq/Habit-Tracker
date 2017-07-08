@@ -32,6 +32,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // Helper method that takes information from the cursor and displays it in a Log String and then
+    // closes the cursor to release its resources and make it invalid.
+    private void displayDatabaseInfo() {
+        Cursor cursor = read();
+        cursor.close();
+    }
+
     // Three helper methods to insert hardcoded habit data into the database
     private void insertHabits() {
         // Gets the database in write mode
@@ -57,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         habitThree.put(HabitEntry.COLUMN_HABIT_TIME, 60);
         habitThree.put(HabitEntry.COLUMN_HABIT_MOOD, HabitEntry.MOOD_HAPPY);
 
-        // Insert a new row for brushing teeth in the database, returning the ID of that new row.
+        // Insert a new row for habits in the database, returning the ID of that new row.
         // The first argument for db.insert() is the habits table name.
         // The second argument provides the name of a column in which the framework
         // can insert NULL in the event that the ContentValues is empty (if
@@ -70,9 +77,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Helper method to display information in Log message about the state of the habits database.
+     * Helper method to read the data from the database, store it in a Cursor object
+     * and return this Cursor
      */
-    private void displayDatabaseInfo() {
+    private Cursor read() {
 
         // Create and/or open a database to read from it
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
@@ -97,46 +105,45 @@ public class MainActivity extends AppCompatActivity {
                 null,                   // Don't filter by row groups
                 null);                  // The sort order
 
-        try {
 
-            // Create a String to build upon with the while loop
-            String logMessage = "These are the contents of my habits table. Currently there are " +
-                    cursor.getCount() + " habits:\n\n";
-            logMessage = logMessage + HabitEntry._ID + " - " +
-                    HabitEntry.COLUMN_HABIT_NAME + " - " +
-                    HabitEntry.COLUMN_HABIT_DONE + " - " +
-                    HabitEntry.COLUMN_HABIT_TIME + " - " +
-                    HabitEntry.COLUMN_HABIT_MOOD + "\n";
+        // Create a String to build upon with the while loop
+        String logMessage = "These are the contents of my habits table. Currently there are " +
+                cursor.getCount() + " habits:\n\n";
+        logMessage = logMessage + HabitEntry._ID + " - " +
+                HabitEntry.COLUMN_HABIT_NAME + " - " +
+                HabitEntry.COLUMN_HABIT_DONE + " - " +
+                HabitEntry.COLUMN_HABIT_TIME + " - " +
+                HabitEntry.COLUMN_HABIT_MOOD + "\n";
 
-            // Figure out the index of each column
-            int idColumnIndex = cursor.getColumnIndex(HabitEntry._ID);
-            int nameColumnIndex = cursor.getColumnIndex(HabitEntry.COLUMN_HABIT_NAME);
-            int doneColumnIndex = cursor.getColumnIndex(HabitEntry.COLUMN_HABIT_DONE);
-            int timeColumnIndex = cursor.getColumnIndex(HabitEntry.COLUMN_HABIT_TIME);
-            int moodColumnIndex = cursor.getColumnIndex(HabitEntry.COLUMN_HABIT_MOOD);
+        // Figure out the index of each column
+        int idColumnIndex = cursor.getColumnIndex(HabitEntry._ID);
+        int nameColumnIndex = cursor.getColumnIndex(HabitEntry.COLUMN_HABIT_NAME);
+        int doneColumnIndex = cursor.getColumnIndex(HabitEntry.COLUMN_HABIT_DONE);
+        int timeColumnIndex = cursor.getColumnIndex(HabitEntry.COLUMN_HABIT_TIME);
+        int moodColumnIndex = cursor.getColumnIndex(HabitEntry.COLUMN_HABIT_MOOD);
 
-            // Iterate through all the returned rows in the cursor
-            while (cursor.moveToNext()) {
-                // Use that index to extract the String or Int value of the word
-                // at the current row the cursor is on.
-                int currentId = cursor.getInt(idColumnIndex);
-                String currentName = cursor.getString(nameColumnIndex);
-                int currendDone = cursor.getInt(doneColumnIndex);
-                int currentTime = cursor.getInt(timeColumnIndex);
-                int currentMood = cursor.getInt(moodColumnIndex);
-                // Display the values from each column of the current row in the String
-                logMessage = logMessage + "\n" + currentId + " - " +
-                        currentName + " - " +
-                        currendDone + " - " +
-                        currentTime + " - " +
-                        currentMood;
-            }
-            // Display the log message containing the full String
-            Log.v(LOG_TAG, logMessage);
-        } finally {
-            // Always close the cursor when you're done reading from it. This releases all its
-            // resources and makes it invalid.
-            cursor.close();
+        // Iterate through all the returned rows in the cursor
+        while (cursor.moveToNext()) {
+            // Use that index to extract the String or Int value of the word
+            // at the current row the cursor is on.
+            int currentId = cursor.getInt(idColumnIndex);
+            String currentName = cursor.getString(nameColumnIndex);
+            int currendDone = cursor.getInt(doneColumnIndex);
+            int currentTime = cursor.getInt(timeColumnIndex);
+            int currentMood = cursor.getInt(moodColumnIndex);
+            // Display the values from each column of the current row in the String
+            logMessage = logMessage + "\n" + currentId + " - " +
+                    currentName + " - " +
+                    currendDone + " - " +
+                    currentTime + " - " +
+                    currentMood;
         }
+        // Display the log message containing the full String
+        Log.v(LOG_TAG, logMessage);
+        return cursor;
+    }
+
+    private void logMessage() {
+
     }
 }
